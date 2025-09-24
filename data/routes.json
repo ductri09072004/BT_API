@@ -1,0 +1,8 @@
+{
+  "/test": {
+    "message": "this is test route"
+  },
+  "/L": {
+    "message": "this is L"
+  }
+}
