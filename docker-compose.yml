@@ -1,13 +1,124 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  api:
-    build: .
+  # Health service - chỉ xử lý health check
+  health:
+    build: ./services/health
     ports:
-      - "5000:5000"
+      - "8001:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped
+
+  # Hello service - chỉ xử lý hello world
+  hello:
+    build: ./services/hello
+    ports:
+      - "8002:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped
+
+  # Admin service - xử lý admin APIs
+  admin:
+    build: ./services/admin
+    ports:
+      - "8003:8000"
     volumes:
       # Mount data directory để persist routes.json
       - ./data:/app/data
     environment:
-      - FLASK_ENV=production
+      - DEBUG=true
     restart: unless-stopped
+
+  # Dynamic service - xử lý dynamic routes
+  dynamic:
+    build: ./services/dynamic
+    ports:
+      - "8004:8000"
+    volumes:
+      # Mount data directory để đọc routes.json
+      - ./data:/app/data
+    environment:
+      - DEBUG=true
+    restart: unless-stopped  # Bye service
+  bye:
+    build: ./services/bye
+    ports:
+      - "8008:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped  # Payment service
+  payment:
+    build: ./services/payment
+    ports:
+      - "8009:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped  # Api5 service
+  api5:
+    build: ./services/api5
+    ports:
+      - "8010:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped  # User service
+  user:
+    build: ./services/user
+    image: bt_api-user:latest
+    ports:
+      - "8011:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped  # Notifi service
+  notifi:
+    build: ./services/notifi
+    ports:
+      - "8012:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped
+
+
+
+
+
+
+
+
+
+
+
+  # Template service (khuôn mẫu để tạo services mới)
+  template:
+    build: ./services/template
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped
+
+  # Thêm các services khác ở đây khi tạo
+  # auth:
+  #   build: ./services/auth
+  #   ports:
+  #     - "8005:8000"
+  #   environment:
+  #     - DEBUG=true
+  #   restart: unless-stopped
+  #
+  # user:
+  #   build: ./services/user
+  #   ports:
+  #     - "8006:8000"
+  #   environment:
+  #     - DEBUG=true
+  #   restart: unless-stopped
+  #
+  # payment:
+  #   build: ./services/payment
+  #   ports:
+  #     - "8007:8000"
+  #   environment:
+  #     - DEBUG=true
+  #   restart: unless-stopped
