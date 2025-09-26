@@ -31,6 +31,13 @@ def create_service(service_name):
         shutil.copytree(template_dir, service_dir)
         print(f"✅ Đã copy template → {service_dir}")
         
+        # Đảm bảo file db.py được copy (nếu có trong template)
+        template_db = os.path.join(template_dir, "db.py")
+        service_db = os.path.join(service_dir, "db.py")
+        if os.path.exists(template_db) and not os.path.exists(service_db):
+            shutil.copy2(template_db, service_db)
+            print(f"✅ Đã copy file db.py")
+        
         # Cập nhật tên service trong main.py
         main_file = os.path.join(service_dir, "main.py")
         with open(main_file, 'r', encoding='utf-8') as f:
@@ -51,6 +58,8 @@ def create_service(service_name):
             f.write(f"# {service_title} Environment Variables\n")
             f.write("PORT=8000\n")
             f.write("DEBUG=true\n")
+            f.write("MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=AppName\n")
+            f.write("MONGODB_DB=test\n")
         
         print(f"✅ Đã tạo file .env.example")
         

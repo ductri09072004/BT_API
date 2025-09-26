@@ -1,13 +1,18 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from db import db
 
 router = APIRouter()
 
 
-@router.get("/user")
-async def user():
-    """Hello world endpoint"""
-    return {"message": "this is user",
-            "service": "user",
-            "name": "blueduck"}
+@router.get("/users")
+async def get_orders():
+    if db is None:
+        raise HTTPException(status_code=500, detail="MONGODB_URI is not configured")
+    docs = await db.users.find().to_list(length=None)
+    for d in docs:
+        if "_id" in d:
+            d["_id"] = str(d["_id"])  # serialize ObjectId
+    return docs
+    
 
-
+# uvicorn main:app --reload --host 0.0.0.0 --port 8000

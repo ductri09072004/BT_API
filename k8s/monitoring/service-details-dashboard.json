@@ -1,0 +1,824 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "bt-api-service-details",
+    "title": "BT_API Service Details",
+    "tags": [
+      "bt-api",
+      "services",
+      "details"
+    ],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Status Overview",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "kube_pod_status_phase{namespace=\"bt-api\"}",
+            "legendFormat": "{{pod}} - {{phase}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "table"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Hello Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"hello.*\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"hello.*\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"hello.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"cpu\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"hello.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"memory\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 3,
+        "title": "Order Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order.*\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order.*\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"cpu\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"memory\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 12
+        }
+      },
+      {
+        "id": 4,
+        "title": "Health Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"health.*\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"health.*\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"health.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"health.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"health.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"cpu\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"health.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"memory\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 5,
+        "title": "Admin Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"admin.*\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"admin.*\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"admin.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"cpu\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"admin.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"memory\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 20
+        }
+      },
+      {
+        "id": 7,
+        "title": "Order5 Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order5.*\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order5.*\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order5.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"cpu\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order5.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"memory\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 8,
+        "title": "Order4 Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order4.*\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order4.*\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"cpu\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order4.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"cpu\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order4.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"memory\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 28
+        }
+      },
+      {
+        "id": 6,
+        "title": "Service Health Check Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"bt-api-services\"}",
+            "legendFormat": "{{instance}} - {{job}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "DOWN",
+                    "color": "red"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 401,
+        "title": "Cus Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"cpu\\\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"cpu\\\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"cpu\\\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"memory\\\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 64
+        }
+      },
+      {
+        "id": 402,
+        "title": "date Service - CPU & Memory",
+        "type": "table",
+        "options": {
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}[5m])) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_mcores"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"cpu\\\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_request_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"cpu\\\"}) * 1000",
+            "instant": true,
+            "legendFormat": "cpu_limit_mcores"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_request_gb"
+          },
+          {
+            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
+            "instant": true,
+            "legendFormat": "mem_limit_gb"
+          },
+          {
+            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"cpu\\\"})) * 100",
+            "instant": true,
+            "legendFormat": "cpu_util_percent"
+          },
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"memory\\\"})) * 100",
+            "instant": true,
+            "legendFormat": "mem_util_percent"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "last"
+              ],
+              "labelsToFields": true
+            }
+          },
+          {
+            "id": "rowsToFields",
+            "options": {
+              "fieldName": "Field",
+              "valueName": "Last"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "A-series": "cpu_mcores",
+                "B-series": "mem_gb",
+                "C-series": "cpu_request_mcores",
+                "D-series": "cpu_limit_mcores",
+                "E-series": "mem_request_gb",
+                "F-series": "mem_limit_gb",
+                "G-series": "cpu_util_percent",
+                "H-series": "mem_util_percent"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 68
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

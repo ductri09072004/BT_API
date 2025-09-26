@@ -11,88 +11,14 @@ spec:
   - host: bt-api.local
     http:
       paths:
-      - path: /health
-        pathType: Prefix
-        backend:
-          service:
-            name: health-service
-            port:
-              number: 8000
-      - path: /hello
-        pathType: Prefix
-        backend:
-          service:
-            name: hello-service
-            port:
-              number: 8000
-      - path: /admin
-        pathType: Prefix
-        backend:
-          service:
-            name: admin-service
-            port:
-              number: 8000
-      - path: /dynamic
-        pathType: Prefix
-        backend:
-          service:
-            name: dynamic-service
-            port:
-              number: 8000
-      - path: /payment
-        pathType: Prefix
-        backend:
-          service:
-            name: payment-service
-            port:
-              number: 8000
-  - host: health.bt-api.local
+  - host: order.bt-api.local
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: health-service
+            name: order-service
             port:
               number: 8000
-  - host: hello.bt-api.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: hello-service
-            port:
-              number: 8000
-  - host: admin.bt-api.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: admin-service
-            port:
-              number: 8000
-  - host: dynamic.bt-api.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: dynamic-service
-            port:
-              number: 8000
-  - host: payment.bt-api.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: payment-service
-            port:
-              number: 8000
+

@@ -3,8 +3,8 @@ from routes import router
 
 # Tạo FastAPI app
 app = FastAPI(
-    title="Template",
-    description="Template service for microservices",
+    title="Order5",
+    description="Order5 service for microservices",
     version="1.0.0"
 )
 
@@ -14,7 +14,13 @@ def verify_api_key(x_api_key: str = Header(..., alias="x-api-key")):
         raise HTTPException(status_code=401, detail="Invalid API key")
     return x_api_key
 
-# Đăng ký routes với dependency
+# Health check endpoint không cần API key
+@app.get("/healthz")
+async def health_check():
+    """Health check endpoint for Kubernetes"""
+    return {"status": "ok", "service": "order5"}
+
+# Đăng ký routes với dependency (trừ healthz)
 app.include_router(router, dependencies=[Depends(verify_api_key)])
 
 if __name__ == "__main__":

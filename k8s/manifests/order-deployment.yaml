@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-service
+  name: order-service
   namespace: bt-api
   labels:
-    app: hello-service
-    service: hello
+    app: order-service
+    service: order
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: hello-service
+      app: order-service
   template:
     metadata:
       labels:
-        app: hello-service
-        service: hello
+        app: order-service
+        service: order
     spec:
       containers:
-      - name: hello-service
-        image: bt_api-hello:latest
+      - name: order-service
+        image: bt_api-order:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
@@ -56,13 +56,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-service
+  name: order-service
   namespace: bt-api
   labels:
-    app: hello-service
+    app: order-service
 spec:
   selector:
-    app: hello-service
+    app: order-service
   ports:
   - port: 8000
     targetPort: 8000

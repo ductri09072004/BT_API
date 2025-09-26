@@ -41,43 +41,90 @@ services:
       - ./data:/app/data
     environment:
       - DEBUG=true
-    restart: unless-stopped  # Bye service
-  bye:
-    build: ./services/bye
+    restart: unless-stopped  
+  
+  test1:
+    build: ./services/test1
     ports:
-      - "8008:8000"
+      - "8017:8000"
     environment:
       - DEBUG=true
-    restart: unless-stopped  # Payment service
-  payment:
-    build: ./services/payment
+    restart: unless-stopped  # Test5 service  # Employee service
+  employee:
+    build: ./services/employee
     ports:
-      - "8009:8000"
-    environment:
-      - DEBUG=true
-    restart: unless-stopped  # Api5 service
-  api5:
-    build: ./services/api5
-    ports:
-      - "8010:8000"
+      - "8018:8000"
     environment:
       - DEBUG=true
     restart: unless-stopped  # User service
   user:
     build: ./services/user
-    image: bt_api-user:latest
     ports:
-      - "8011:8000"
+      - "8019:8000"
     environment:
       - DEBUG=true
-    restart: unless-stopped  # Notifi service
-  notifi:
-    build: ./services/notifi
+    restart: unless-stopped  # Order service
+  order:
+    build: ./services/order
     ports:
-      - "8012:8000"
+      - "8020:8000"
     environment:
       - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=test
     restart: unless-stopped
+  order2:
+    build: ./services/order2
+    ports:
+      - "8022:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=test
+    restart: unless-stopped
+  order3:
+    build: ./services/order3
+    ports:
+      - "8023:8000"
+    environment:
+      - DEBUG=true
+    restart: unless-stopped  # Order4 service
+  order4:
+    build: ./services/order4
+    ports:
+      - "8024:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=test
+    restart: unless-stopped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -97,6 +144,39 @@ services:
     environment:
       - DEBUG=true
     restart: unless-stopped
+
+  order5:
+    build: ./services/order5
+    ports:
+      - "8025:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=test
+    restart: unless-stopped
+
+  cus:
+    build: ./services/cus
+    ports:
+      - "8026:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=test
+    restart: unless-stopped
+
+  date:
+    build: ./services/date
+    ports:
+      - "8027:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=test
+    restart: unless-stopped
+
+
+
 
   # Thêm các services khác ở đây khi tạo
   # auth:
@@ -122,3 +202,4 @@ services:
   #   environment:
   #     - DEBUG=true
   #   restart: unless-stopped
+

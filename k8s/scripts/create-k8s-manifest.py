@@ -51,13 +51,17 @@ spec:
             configMapKeyRef:
               name: bt-api-config
               key: DEBUG
+        - name: MONGODB_URI
+          value: "mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress"
+        - name: MONGODB_DB
+          value: "test"
         resources:
           requests:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "100m"
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "512Mi"
+            cpu: "500m"
         livenessProbe:
           httpGet:
             path: /healthz

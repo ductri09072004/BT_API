@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY . .
+# Ensure .env (if provided at build context) is not baked; runtime mount/read via env
 
 # Expose port
 EXPOSE 8000
