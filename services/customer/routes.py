@@ -4,11 +4,11 @@ from db import db
 router = APIRouter()
 
 
-@router.get("/orders")
-async def get_orders():
+@router.get("/customer")
+async def get_Customer():
     if db is None:
         raise HTTPException(status_code=500, detail="MONGODB_URI is not configured")
-    docs = await db.Order.find().to_list(length=None)
+    docs = await db.Customer.find().to_list(length=None)
     for d in docs:
         if "_id" in d:
             d["_id"] = str(d["_id"])  # serialize ObjectId

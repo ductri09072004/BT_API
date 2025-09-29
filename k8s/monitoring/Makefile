@@ -43,3 +43,5 @@ metrics:
 	@kubectl top pods -n bt-api
 	@echo ""
 	@kubectl top nodes
+
+

@@ -4,7 +4,7 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 
 # Tạo FastAPI app
 app = FastAPI(
-    title="Template",
+    title="Order",
     description="Template service for microservices",
     version="1.0.0"
 )

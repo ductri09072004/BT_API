@@ -20,15 +20,4 @@ services:
       - MONGODB_DB=TPExpress
     restart: unless-stopped
 
-  customer:
-    build: ./services/customer
-    ports:
-      - "8002:8000"
-    environment:
-      - DEBUG=true
-      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
-      - MONGODB_DB=TPExpress
-    restart: unless-stopped
-
-
 

@@ -17,7 +17,13 @@
         "targets": [
           {
             "expr": "kube_pod_status_phase{namespace=\"bt-api\"}",
-            "legendFormat": "{{pod}} - {{phase}}"
+            "legendFormat": "{{pod}} - {{phase}}",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
           }
         ],
         "fieldConfig": {
@@ -32,558 +38,82 @@
           "w": 24,
           "x": 0,
           "y": 0
-        }
-      },
-      {
-        "id": 2,
-        "title": "Hello Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
         },
-        "targets": [
-          {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"hello.*\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
-          },
-          {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"hello.*\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"hello.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"cpu\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"hello.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"hello.*\", resource=\"memory\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
-          }
-        ],
-        "gridPos": {
-          "h": 4,
-          "w": 24,
-          "x": 0,
-          "y": 8
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         }
       },
       {
         "id": 3,
         "title": "Order Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
-        },
+        "type": "timeseries",
         "targets": [
           {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order.*\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Order CPU Usage %",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order.*\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Order Memory Used (MB)",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
+            "expr": "process_virtual_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Order Memory Virtual (MB)",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
+            "expr": "python_gc_objects_collected_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"}",
+            "instant": false,
+            "legendFormat": "Order GC Objects",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "D",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"cpu\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order.*\", resource=\"memory\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
+            "expr": "up{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"}",
+            "instant": false,
+            "legendFormat": "Order Status",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "E",
+            "queryType": "timeSeriesQuery"
           }
         ],
         "gridPos": {
-          "h": 4,
+          "h": 8,
           "w": 24,
           "x": 0,
           "y": 12
-        }
-      },
-      {
-        "id": 4,
-        "title": "Health Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
         },
-        "targets": [
-          {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"health.*\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
-          },
-          {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"health.*\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"health.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"health.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"health.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"cpu\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"health.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"health.*\", resource=\"memory\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
-          }
-        ],
-        "gridPos": {
-          "h": 4,
-          "w": 24,
-          "x": 0,
-          "y": 16
-        }
-      },
-      {
-        "id": 5,
-        "title": "Admin Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
-        },
-        "targets": [
-          {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"admin.*\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
-          },
-          {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"admin.*\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"admin.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"cpu\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"admin.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"admin.*\", resource=\"memory\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
-          }
-        ],
-        "gridPos": {
-          "h": 4,
-          "w": 24,
-          "x": 0,
-          "y": 20
-        }
-      },
-      {
-        "id": 7,
-        "title": "Order5 Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
-        },
-        "targets": [
-          {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order5.*\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
-          },
-          {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order5.*\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order5.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"cpu\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order5.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order5.*\", resource=\"memory\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
-          }
-        ],
-        "gridPos": {
-          "h": 4,
-          "w": 24,
-          "x": 0,
-          "y": 24
-        }
-      },
-      {
-        "id": 8,
-        "title": "Order4 Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
-        },
-        "targets": [
-          {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order4.*\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
-          },
-          {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order4.*\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"cpu\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"memory\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"bt-api\", pod=~\"order4.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"cpu\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\"bt-api\", pod=~\"order4.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"bt-api\", pod=~\"order4.*\", resource=\"memory\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
-          }
-        ],
-        "gridPos": {
-          "h": 4,
-          "w": 24,
-          "x": 0,
-          "y": 28
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         }
       },
       {
@@ -593,7 +123,13 @@
         "targets": [
           {
             "expr": "up{job=\"bt-api-services\"}",
-            "legendFormat": "{{instance}} - {{job}}"
+            "legendFormat": "{{instance}} - {{job}}",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
           }
         ],
         "fieldConfig": {
@@ -627,198 +163,284 @@
           "h": 6,
           "w": 24,
           "x": 0,
-          "y": 32
+          "y": 20
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         }
       },
       {
-        "id": 401,
-        "title": "Cus Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
+        "id": 500,
+        "title": "Customer Service - CPU & Memory",
+        "type": "timeseries",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "targets": [
           {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Customer CPU Usage %",
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Customer Memory Used (MB)",
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"cpu\\\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_virtual_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Customer Memory Virtual (MB)",
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"cpu\\\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "python_gc_objects_collected_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"}",
+            "instant": false,
+            "legendFormat": "Customer GC Objects",
+            "refId": "D",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"cpu\\\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\"}) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"cus.*\\\", resource=\\\"memory\\\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "up{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"}",
+            "instant": false,
+            "legendFormat": "Customer Status",
+            "refId": "E",
+            "queryType": "timeSeriesQuery"
           }
         ],
         "gridPos": {
-          "h": 4,
+          "h": 8,
           "w": 24,
           "x": 0,
-          "y": 64
+          "y": 38
         }
       },
       {
-        "id": 402,
-        "title": "date Service - CPU & Memory",
-        "type": "table",
-        "options": {
-          "showHeader": true
+        "id": 500,
+        "title": "Template Service - CPU & Memory",
+        "type": "timeseries",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "targets": [
           {
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}[5m])) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_mcores"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Template CPU Usage %",
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_gb"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Template Memory Used (MB)",
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"cpu\\\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_request_mcores"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_virtual_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Template Memory Virtual (MB)",
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"cpu\\\"}) * 1000",
-            "instant": true,
-            "legendFormat": "cpu_limit_mcores"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "python_gc_objects_collected_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"}",
+            "instant": false,
+            "legendFormat": "Template GC Objects",
+            "refId": "D",
+            "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "sum(kube_pod_container_resource_requests{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_request_gb"
-          },
-          {
-            "expr": "sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"memory\\\"}) / 1024 / 1024 / 1024",
-            "instant": true,
-            "legendFormat": "mem_limit_gb"
-          },
-          {
-            "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"cpu\\\"})) * 100",
-            "instant": true,
-            "legendFormat": "cpu_util_percent"
-          },
-          {
-            "expr": "(sum(container_memory_working_set_bytes{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\"}) / sum(kube_pod_container_resource_limits{namespace=\\\"bt-api\\\", pod=~\\\"date.*\\\", resource=\\\"memory\\\"})) * 100",
-            "instant": true,
-            "legendFormat": "mem_util_percent"
-          }
-        ],
-        "transformations": [
-          {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "last"
-              ],
-              "labelsToFields": true
-            }
-          },
-          {
-            "id": "rowsToFields",
-            "options": {
-              "fieldName": "Field",
-              "valueName": "Last"
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {
-                "Time": true
-              },
-              "renameByName": {
-                "A-series": "cpu_mcores",
-                "B-series": "mem_gb",
-                "C-series": "cpu_request_mcores",
-                "D-series": "cpu_limit_mcores",
-                "E-series": "mem_request_gb",
-                "F-series": "mem_limit_gb",
-                "G-series": "cpu_util_percent",
-                "H-series": "mem_util_percent"
-              }
-            }
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "up{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"}",
+            "instant": false,
+            "legendFormat": "Template Status",
+            "refId": "E",
+            "queryType": "timeSeriesQuery"
           }
         ],
         "gridPos": {
-          "h": 4,
+          "h": 8,
           "w": 24,
           "x": 0,
-          "y": 68
+          "y": 46
+        }
+      },
+      {
+        "id": 600,
+        "title": "Services Performance Overview",
+        "type": "timeseries",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Template CPU %",
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Order CPU %",
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Customer CPU %",
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Template Memory (MB)",
+            "refId": "D",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Order Memory (MB)",
+            "refId": "E",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Customer Memory (MB)",
+            "refId": "F",
+            "queryType": "timeSeriesQuery"
+          }
+        ],
+        "gridPos": {
+          "h": 10,
+          "w": 24,
+          "x": 0,
+          "y": 54
         }
       }
     ],
     "time": {
-      "from": "now-1h",
+      "from": "now-5m",
       "to": "now"
     },
-    "refresh": "30s"
+    "refresh": "5s",
+    "liveNow": true,
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "schemaVersion": 27,
+    "style": "dark",
+    "version": 1
   }
 }

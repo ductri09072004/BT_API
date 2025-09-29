@@ -43,9 +43,9 @@ def create_service(service_name):
         with open(main_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Thay thế "Template Service" bằng tên service mới
+        # Thay thế title="Template" bằng tên service mới
         service_title = service_name.replace('-', ' ').replace('_', ' ').title()
-        content = content.replace("Template Service", service_title)
+        content = content.replace('title="Template"', f'title="{service_title}"')
         
         with open(main_file, 'w', encoding='utf-8') as f:
             f.write(content)
@@ -59,7 +59,7 @@ def create_service(service_name):
             f.write("PORT=8000\n")
             f.write("DEBUG=true\n")
             f.write("MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=AppName\n")
-            f.write("MONGODB_DB=test\n")
+            f.write("MONGODB_DB=TPExpress\n")
         
         print(f"✅ Đã tạo file .env.example")
         

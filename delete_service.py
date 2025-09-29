@@ -103,6 +103,59 @@ def ingress_remove_backend(service: str) -> None:
         print(f"[INFO] No matching ingress rule found for backend '{service}-service' (skip)")
 
 
+def docker_compose_remove_service(service: str) -> None:
+    """Xóa service khỏi docker-compose.yml"""
+    compose_path = Path("docker-compose.yml")
+    if not compose_path.exists():
+        print(f"[INFO] docker-compose.yml not found (skip)")
+        return
+    
+    try:
+        original = compose_path.read_text(encoding="utf-8")
+    except Exception:
+        original = compose_path.read_text(encoding="utf-8", errors="ignore")
+    
+    # Pattern để tìm và xóa toàn bộ service block (từ tên service đến service tiếp theo hoặc end of file)
+    # Bao gồm cả comment phía trên service nếu có
+    pattern = re.compile(
+        r"\n\s*#.*?\n\s*" + re.escape(service) + r":\s*\n"
+        r"(?:\s*.*?\n)*?"
+        r"(?=\n\s*(?:[a-zA-Z_][a-zA-Z0-9_]*:|#|\Z))",
+        re.MULTILINE
+    )
+    
+    # Nếu không tìm thấy pattern với comment, thử pattern không có comment
+    if not pattern.search(original):
+        pattern = re.compile(
+            r"\n\s*" + re.escape(service) + r":\s*\n"
+            r"(?:\s*.*?\n)*?"
+            r"(?=\n\s*(?:[a-zA-Z_][a-zA-Z0-9_]*:|#|\Z))",
+            re.MULTILINE
+        )
+    
+    new_content, num_subs = pattern.subn("", original)
+    
+    if num_subs > 0:
+        backup = compose_path.with_suffix(".bak")
+        try:
+            # Tạo backup
+            compose_path.replace(backup)
+            # Ghi nội dung mới
+            compose_path.write_text(new_content, encoding="utf-8")
+            print(f"[SUCCESS] Removed service '{service}' from docker-compose.yml. Backup: {backup}")
+        except Exception as exc:
+            print(f"[ERROR] Failed updating docker-compose.yml: {exc}")
+            try:
+                # Restore backup nếu có lỗi
+                if compose_path.exists():
+                    compose_path.unlink()
+                backup.replace(compose_path)
+            except Exception:
+                pass
+    else:
+        print(f"[INFO] Service '{service}' not found in docker-compose.yml (skip)")
+
+
 def delete_service_folder(service: str) -> None:
     svc_dir = Path("services") / service
     if svc_dir.exists():
@@ -130,12 +183,15 @@ def main() -> int:
     docker_compose_stop_rm(service)
     docker_kill_leftover(service)
     docker_remove_image(service)
+    
+    # 2) Remove service from docker-compose.yml
+    docker_compose_remove_service(service)
 
-    # 2) Kubernetes: delete deployment & service & manifest, clean ingress
+    # 3) Kubernetes: delete deployment & service & manifest, clean ingress
     k8s_delete_resources(service)
     ingress_remove_backend(service)
 
-    # 3) Optional: delete local service folder
+    # 4) Optional: delete local service folder
     delete_service_folder(service)
 
     print("[DONE] Completed deletion attempts. Review messages above for any skips/errors.")

@@ -34,7 +34,7 @@ def update_docker_compose(service_name, port):
     environment:
       - DEBUG=true
       - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
-      - MONGODB_DB=test
+      - MONGODB_DB=TPExpress
     restart: unless-stopped
 """
         
