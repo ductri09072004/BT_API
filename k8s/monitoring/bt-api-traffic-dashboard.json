@@ -1,0 +1,98 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "bt-api-traffic",
+    "title": "BT_API Traffic & Performance",
+    "timezone": "browser",
+    "tags": ["bt-api", "traffic", "services"],
+    "editable": true,
+    "schemaVersion": 27,
+    "version": 1,
+    "style": "dark",
+    "graphTooltip": 0,
+    "refresh": "5s",
+    "time": { "from": "now-15m", "to": "now" },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Health",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "queryType": "timeSeriesQuery",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "up{job=\"bt-api-services\"}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [ { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } } ],
+            "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": 0 }, { "color": "green", "value": 1 } ] }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "HTTP Methods Count (r/s)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          { "refId": "A", "queryType": "timeSeriesQuery", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(template_http_requests_total[1m])) by (method)", "legendFormat": "Template {{method}}" },
+          { "refId": "B", "queryType": "timeSeriesQuery", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(order_http_requests_total[1m])) by (method)", "legendFormat": "Order {{method}}" },
+          { "refId": "C", "queryType": "timeSeriesQuery", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(customer_http_requests_total[1m])) by (method)", "legendFormat": "Customer {{method}}" }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "HTTP Status Codes (r/s)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          { "refId": "A", "queryType": "timeSeriesQuery", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(template_http_requests_total[1m])) by (status)", "legendFormat": "Template {{status}}" },
+          { "refId": "B", "queryType": "timeSeriesQuery", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(order_http_requests_total[1m])) by (status)", "legendFormat": "Order {{status}}" },
+          { "refId": "C", "queryType": "timeSeriesQuery", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(customer_http_requests_total[1m])) by (status)", "legendFormat": "Customer {{status}}" }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Template CPU % & Memory (MB)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          { "refId": "A", "queryType": "timeSeriesQuery", "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\",instance=~\"host.docker.internal:8000\"}[1m]) * 100", "legendFormat": "CPU %" },
+          { "refId": "B", "queryType": "timeSeriesQuery", "expr": "process_resident_memory_bytes{job=\"bt-api-services\",instance=~\"host.docker.internal:8000\"} / 1024 / 1024", "legendFormat": "Mem (MB)" }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Order CPU % & Memory (MB)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          { "refId": "A", "queryType": "timeSeriesQuery", "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\",instance=~\"host.docker.internal:8001\"}[1m]) * 100", "legendFormat": "CPU %" },
+          { "refId": "B", "queryType": "timeSeriesQuery", "expr": "process_resident_memory_bytes{job=\"bt-api-services\",instance=~\"host.docker.internal:8001\"} / 1024 / 1024", "legendFormat": "Mem (MB)" }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Customer CPU % & Memory (MB)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 38 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          { "refId": "A", "queryType": "timeSeriesQuery", "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\",instance=~\"host.docker.internal:8002\"}[1m]) * 100", "legendFormat": "CPU %" },
+          { "refId": "B", "queryType": "timeSeriesQuery", "expr": "process_resident_memory_bytes{job=\"bt-api-services\",instance=~\"host.docker.internal:8002\"} / 1024 / 1024", "legendFormat": "Mem (MB)" }
+        ]
+      }
+    ]
+  }
+}
+
+
