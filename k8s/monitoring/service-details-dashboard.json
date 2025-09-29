@@ -396,6 +396,106 @@
           "x": 0,
           "y": 54
         }
+      },
+      {
+        "id": 700,
+        "title": "HTTP Methods Count",
+        "type": "timeseries",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(template_http_requests_total{job=\"bt-api-services\"}[5m])) by (method)",
+            "instant": false,
+            "legendFormat": "Template {{method}}",
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(order_http_requests_total{job=\"bt-api-services\"}[5m])) by (method)",
+            "instant": false,
+            "legendFormat": "Order {{method}}",
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(customer_http_requests_total{job=\"bt-api-services\"}[5m])) by (method)",
+            "instant": false,
+            "legendFormat": "Customer {{method}}",
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 64
+        }
+      },
+      {
+        "id": 800,
+        "title": "HTTP Status Codes",
+        "type": "timeseries",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(template_http_requests_total{job=\"bt-api-services\"}[5m])) by (status)",
+            "instant": false,
+            "legendFormat": "Template {{status}}",
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(order_http_requests_total{job=\"bt-api-services\"}[5m])) by (status)",
+            "instant": false,
+            "legendFormat": "Order {{status}}",
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(customer_http_requests_total{job=\"bt-api-services\"}[5m])) by (status)",
+            "instant": false,
+            "legendFormat": "Customer {{status}}",
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 72
+        }
       }
     ],
     "time": {

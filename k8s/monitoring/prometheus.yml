@@ -64,7 +64,6 @@ scrape_configs:
     - targets: 
       - 'host.docker.internal:8000'  # template service
       - 'host.docker.internal:8001'  # order service
+      - 'host.docker.internal:8002'  # customer service
     metrics_path: /metrics
     scrape_interval: 30s
-
-

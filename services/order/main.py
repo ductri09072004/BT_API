@@ -1,6 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from routes import router
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+import time
+
+# Prometheus metrics (service-scoped names to avoid duplicates)
+order_http_requests_total = Counter(
+    'order_http_requests_total', 'Total HTTP requests (order)', ['method', 'endpoint', 'status']
+)
+order_http_request_duration_seconds = Histogram(
+    'order_http_request_duration_seconds', 'HTTP request duration (order)', ['method', 'endpoint']
+)
 
 # Tạo FastAPI app
 app = FastAPI(
@@ -8,6 +17,28 @@ app = FastAPI(
     description="Template service for microservices",
     version="1.0.0"
 )
+
+# Middleware để track HTTP requests
+@app.middleware("http")
+async def track_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # Process request
+    response = await call_next(request)
+    
+    # Calculate duration
+    duration = time.time() - start_time
+    
+    # Extract metrics
+    method = request.method
+    endpoint = request.url.path
+    status = str(response.status_code)
+    
+    # Update metrics
+    order_http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
+    order_http_request_duration_seconds.labels(method=method, endpoint=endpoint).observe(duration)
+    
+    return response
 
 # Đăng ký routes KHÔNG cần API key
 app.include_router(router)
