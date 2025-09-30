@@ -122,6 +122,165 @@ def rollout_status(service: str) -> int:
     return run(["kubectl", "rollout", "status", f"deployment/{service}-service", "-n", "bt-api", "--timeout=180s"])
 
 
+def update_dashboard_for_service(service_name: str, port: int):
+    """Tự động cập nhật dashboard cho service mới"""
+    
+    service_title = service_name.replace('-', ' ').replace('_', ' ').title()
+    dashboard_file = Path("k8s/monitoring/service-details-dashboard.json")
+    
+    if not dashboard_file.exists():
+        print(f"[WARNING] Khong tim thay dashboard file: {dashboard_file}")
+        return
+    
+    try:
+        # Đọc dashboard hiện tại
+        with open(dashboard_file, 'r', encoding='utf-8') as f:
+            dashboard = json.load(f)
+        
+        # Kiểm tra xem service đã có trong dashboard chưa
+        service_panel_title = f"{service_title} Service - CPU & Memory"
+        existing_panel = None
+        for panel in dashboard["dashboard"]["panels"]:
+            if panel.get("title") == service_panel_title:
+                existing_panel = panel
+                break
+        
+        if existing_panel:
+            print(f"[INFO] Service '{service_title}' da co trong dashboard")
+            return
+        
+        # Tạo panel mới cho service
+        new_panel = {
+            "id": 1000 + len(dashboard["dashboard"]["panels"]),  # ID duy nhất
+            "title": service_panel_title,
+            "type": "timeseries",
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": f"rate(process_cpu_seconds_total{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}}[5m]) * 100",
+                    "instant": False,
+                    "legendFormat": f"{service_title} CPU Usage %",
+                    "refId": "A",
+                    "queryType": "timeSeriesQuery"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": f"process_resident_memory_bytes{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}} / 1024 / 1024",
+                    "instant": False,
+                    "legendFormat": f"{service_title} Memory Used (MB)",
+                    "refId": "B",
+                    "queryType": "timeSeriesQuery"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": f"process_virtual_memory_bytes{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}} / 1024 / 1024",
+                    "instant": False,
+                    "legendFormat": f"{service_title} Memory Virtual (MB)",
+                    "refId": "C",
+                    "queryType": "timeSeriesQuery"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "512",  # Memory limit mặc định (theo script create-k8s-manifest.py)
+                    "instant": False,
+                    "legendFormat": f"{service_title} Memory Limit (MB)",
+                    "refId": "D",
+                    "queryType": "timeSeriesQuery"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "256",  # Memory request mặc định (theo script create-k8s-manifest.py)
+                    "instant": False,
+                    "legendFormat": f"{service_title} Memory Request (MB)",
+                    "refId": "E",
+                    "queryType": "timeSeriesQuery"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": len(dashboard["dashboard"]["panels"]) * 10  # Vị trí tự động
+            }
+        }
+        
+        # Thêm panel mới vào dashboard
+        dashboard["dashboard"]["panels"].append(new_panel)
+        
+        # Ghi lại dashboard
+        with open(dashboard_file, 'w', encoding='utf-8') as f:
+            json.dump(dashboard, f, indent=2, ensure_ascii=False)
+        
+        print(f"[SUCCESS] Da them {service_title} Service vao dashboard")
+        
+    except Exception as e:
+        print(f"[WARNING] Khong the cap nhat dashboard: {e}")
+        print(f"[INFO] Hay them service '{service_title}' vao dashboard thu cong")
+
+
+def find_service_port(service: str) -> int:
+    """Tìm port của service từ docker-compose hoặc manifest"""
+    
+    # Thử tìm từ docker-compose.yml
+    docker_compose_file = Path("docker-compose.yml")
+    if docker_compose_file.exists():
+        try:
+            with open(docker_compose_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Tìm pattern: "port:8000" cho service
+            import re
+            pattern = rf'"{service}-service":\s*\n.*?ports:\s*\n.*?"(\d+):8000"'
+            match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
+            if match:
+                return int(match.group(1))
+        except Exception as e:
+            print(f"[WARNING] Khong the doc docker-compose.yml: {e}")
+    
+    # Thử tìm từ manifest
+    manifest_file = Path(f"k8s/manifests/{service}-deployment.yaml")
+    if manifest_file.exists():
+        try:
+            with open(manifest_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Tìm pattern: targetPort: 8000 trong Service
+            import re
+            pattern = rf'name: {service}-service.*?ports:.*?targetPort: 8000'
+            match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
+            if match:
+                # Tìm port trước targetPort
+                port_pattern = r'port: (\d+)'
+                port_match = re.search(port_pattern, match.group(0))
+                if port_match:
+                    return int(port_match.group(1))
+        except Exception as e:
+            print(f"[WARNING] Khong the doc manifest: {e}")
+    
+    # Default port nếu không tìm thấy
+    print(f"[WARNING] Khong tim thay port cho service '{service}', su dung port mac dinh 8000")
+    return 8000
+
+
 def upsert_service_panel_in_dashboard(service: str) -> None:
     """Add a per-service table panel to k8s/monitoring/service-details-dashboard.json if missing."""
     dashboard_path = Path("k8s/monitoring/service-details-dashboard.json")
@@ -228,7 +387,13 @@ def main() -> int:
     rollout_restart(service)
     rollout_status(service)
     # Update monitoring dashboard
-    upsert_service_panel_in_dashboard(service)
+    try:
+        # Tìm port từ docker-compose hoặc manifest
+        port = find_service_port(service)
+        update_dashboard_for_service(service, port)
+    except Exception as e:
+        print(f"[WARNING] Khong the cap nhat dashboard: {e}")
+        upsert_service_panel_in_dashboard(service)  # Fallback to old method
     print("[DONE] docker compose build/up + K8s apply/rollout complete.")
     return 0
 

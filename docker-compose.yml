@@ -8,6 +8,7 @@ services:
       - "8000:8000"
     environment:
       - DEBUG=true
+      - KAFKA_BOOTSTRAP=host.docker.internal:9092
     labels:
       co.elastic.logs/enabled: "true"
       co.elastic.logs/json.keys_under_root: "true"
@@ -22,6 +23,8 @@ services:
       - DEBUG=true
       - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
       - MONGODB_DB=TPExpress
+      - KAFKA_BOOTSTRAP=host.docker.internal:9092
+      - KAFKA_TOPIC=order.events
     labels:
       co.elastic.logs/enabled: "true"
       co.elastic.logs/json.keys_under_root: "true"
@@ -36,11 +39,35 @@ services:
       - DEBUG=true
       - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
       - MONGODB_DB=TPExpress
+      - KAFKA_BOOTSTRAP=host.docker.internal:9092
+      - KAFKA_TOPIC=order.events
     labels:
       co.elastic.logs/enabled: "true"
       co.elastic.logs/json.keys_under_root: "true"
       co.elastic.logs/json.add_error_key: "true"
     restart: unless-stopped
+
+  employee:
+    build: ./services/employee
+    ports:
+      - "8003:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=TPExpress
+    restart: unless-stopped
+
+  driver:
+    build: ./services/driver
+    ports:
+      - "8004:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=TPExpress
+    restart: unless-stopped
+
+
 
 
 

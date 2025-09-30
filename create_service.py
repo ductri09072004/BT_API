@@ -9,6 +9,7 @@ import sys
 import shutil
 import re
 import subprocess
+import json
 
 def create_service(service_name):
     """Tạo service mới từ template"""
@@ -100,11 +101,153 @@ def create_service(service_name):
             print(f"[WARNING] Loi khi cap nhat docker-compose.yml: {e}")
             print(f"[INFO] Hay them service '{service_name}' vao docker-compose.yml thu cong")
         
+        # Tự động cập nhật dashboard
+        print(f"\n[INFO] Dang cap nhat dashboard...")
+        try:
+            update_dashboard_for_service(service_name, next_port)
+            print(f"[SUCCESS] Da tu dong cap nhat dashboard cho service '{service_name}'")
+        except Exception as e:
+            print(f"[WARNING] Khong the tu dong cap nhat dashboard: {e}")
+            print(f"[INFO] Hay them service '{service_name}' vao dashboard thu cong")
+        
         return True
         
     except Exception as e:
         print(f"[ERROR] Loi khi tao service: {e}")
         return False
+
+def update_dashboard_for_service(service_name, port):
+    """Tự động cập nhật dashboard cho service mới"""
+    
+    service_title = service_name.replace('-', ' ').replace('_', ' ').title()
+    dashboard_file = "k8s/monitoring/service-details-dashboard.json"
+    
+    if not os.path.exists(dashboard_file):
+        print(f"[WARNING] Khong tim thay dashboard file: {dashboard_file}")
+        return
+    
+    # Đọc dashboard hiện tại
+    with open(dashboard_file, 'r', encoding='utf-8') as f:
+        dashboard = json.load(f)
+    
+    # Tạo panel mới cho service
+    new_panel = {
+        "id": 1000 + len(dashboard["dashboard"]["panels"]),  # ID duy nhất
+        "title": f"{service_title} Service - CPU & Memory",
+        "type": "timeseries",
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "targets": [
+            {
+                "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                },
+                "expr": f"rate(process_cpu_seconds_total{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}}[5m]) * 100",
+                "instant": False,
+                "legendFormat": f"{service_title} CPU Usage %",
+                "refId": "A",
+                "queryType": "timeSeriesQuery"
+            },
+            {
+                "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                },
+                "expr": f"process_resident_memory_bytes{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}} / 1024 / 1024",
+                "instant": False,
+                "legendFormat": f"{service_title} Memory Used (MB)",
+                "refId": "B",
+                "queryType": "timeSeriesQuery"
+            },
+            {
+                "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                },
+                "expr": f"process_virtual_memory_bytes{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}} / 1024 / 1024",
+                "instant": False,
+                "legendFormat": f"{service_title} Memory Virtual (MB)",
+                "refId": "C",
+                "queryType": "timeSeriesQuery"
+            },
+            {
+                "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                },
+                "expr": "512",  # Memory limit mặc định (theo script create-k8s-manifest.py)
+                "instant": False,
+                "legendFormat": f"{service_title} Memory Limit (MB)",
+                "refId": "D",
+                "queryType": "timeSeriesQuery"
+            },
+            {
+                "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                },
+                "expr": "256",  # Memory request mặc định (theo script create-k8s-manifest.py)
+                "instant": False,
+                "legendFormat": f"{service_title} Memory Request (MB)",
+                "refId": "E",
+                "queryType": "timeSeriesQuery"
+            }
+        ],
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": len(dashboard["dashboard"]["panels"]) * 10  # Vị trí tự động
+        }
+    }
+    
+    # Thêm panel mới vào dashboard
+    dashboard["dashboard"]["panels"].append(new_panel)
+    
+    # Cập nhật Services Performance Overview panel để bao gồm service mới
+    performance_panel = None
+    for panel in dashboard["dashboard"]["panels"]:
+        if panel.get("title") == "Services Performance Overview":
+            performance_panel = panel
+            break
+    
+    if performance_panel:
+        # Thêm CPU metric cho service mới
+        new_cpu_target = {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "expr": f"rate(process_cpu_seconds_total{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}}[5m]) * 100",
+            "instant": False,
+            "legendFormat": f"{service_title} CPU %",
+            "refId": f"G{len(performance_panel['targets'])}",
+            "queryType": "timeSeriesQuery"
+        }
+        performance_panel["targets"].append(new_cpu_target)
+        
+        # Thêm Memory metric cho service mới
+        new_memory_target = {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "expr": f"process_resident_memory_bytes{{job=\"bt-api-services\", instance=~\"host.docker.internal:{port}\"}} / 1024 / 1024",
+            "instant": False,
+            "legendFormat": f"{service_title} Memory (MB)",
+            "refId": f"H{len(performance_panel['targets'])}",
+            "queryType": "timeSeriesQuery"
+        }
+        performance_panel["targets"].append(new_memory_target)
+    
+    # Ghi lại dashboard
+    with open(dashboard_file, 'w', encoding='utf-8') as f:
+        json.dump(dashboard, f, indent=2, ensure_ascii=False)
+    
+    print(f"[SUCCESS] Da them {service_title} Service vao dashboard")
 
 def main():
     if len(sys.argv) != 2:

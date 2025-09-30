@@ -16,13 +16,43 @@
         "type": "table",
         "targets": [
           {
-            "expr": "kube_pod_status_phase{namespace=\"bt-api\"}",
-            "legendFormat": "{{pod}} - {{phase}}",
+            "expr": "up{job=\"bt-api-services\", instance=\"host.docker.internal:8001\"}",
+            "legendFormat": "Order Service",
             "datasource": {
               "type": "prometheus",
               "uid": "prometheus"
             },
             "refId": "A",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "expr": "up{job=\"bt-api-services\", instance=\"host.docker.internal:8002\"}",
+            "legendFormat": "Customer Service",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "expr": "up{job=\"bt-api-services\", instance=\"host.docker.internal:8003\"}",
+            "legendFormat": "Employee Service",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "expr": "up{job=\"bt-api-services\", instance=\"host.docker.internal:8004\"}",
+            "legendFormat": "Driver Service",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "D",
             "queryType": "timeSeriesQuery"
           }
         ],
@@ -30,6 +60,33 @@
           "defaults": {
             "custom": {
               "displayMode": "table"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "DOWN",
+                    "color": "red"
+                  },
+                  "1": {
+                    "text": "UP",
+                    "color": "green"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
             }
           }
         },
@@ -83,9 +140,9 @@
             "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "python_gc_objects_collected_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"}",
+            "expr": "512",
             "instant": false,
-            "legendFormat": "Order GC Objects",
+            "legendFormat": "Order Memory Limit (MB)",
             "datasource": {
               "type": "prometheus",
               "uid": "prometheus"
@@ -94,9 +151,9 @@
             "queryType": "timeSeriesQuery"
           },
           {
-            "expr": "up{job=\"bt-api-services\", instance=~\"host.docker.internal:8001\"}",
+            "expr": "128",
             "instant": false,
-            "legendFormat": "Order Status",
+            "legendFormat": "Order Memory Request (MB)",
             "datasource": {
               "type": "prometheus",
               "uid": "prometheus"
@@ -217,9 +274,9 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "expr": "python_gc_objects_collected_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"}",
+            "expr": "128",
             "instant": false,
-            "legendFormat": "Customer GC Objects",
+            "legendFormat": "Customer Memory Limit (MB)",
             "refId": "D",
             "queryType": "timeSeriesQuery"
           },
@@ -228,9 +285,9 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "expr": "up{job=\"bt-api-services\", instance=~\"host.docker.internal:8002\"}",
+            "expr": "64",
             "instant": false,
-            "legendFormat": "Customer Status",
+            "legendFormat": "Customer Memory Request (MB)",
             "refId": "E",
             "queryType": "timeSeriesQuery"
           }
@@ -289,9 +346,9 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "expr": "python_gc_objects_collected_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"}",
+            "expr": "128",
             "instant": false,
-            "legendFormat": "Template GC Objects",
+            "legendFormat": "Template Memory Limit (MB)",
             "refId": "D",
             "queryType": "timeSeriesQuery"
           },
@@ -300,9 +357,9 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "expr": "up{job=\"bt-api-services\", instance=~\"host.docker.internal:8000\"}",
+            "expr": "64",
             "instant": false,
-            "legendFormat": "Template Status",
+            "legendFormat": "Template Memory Request (MB)",
             "refId": "E",
             "queryType": "timeSeriesQuery"
           }
@@ -387,6 +444,50 @@
             "instant": false,
             "legendFormat": "Customer Memory (MB)",
             "refId": "F",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8003\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Employee CPU %",
+            "refId": "G6",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8003\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Employee Memory (MB)",
+            "refId": "H7",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8004\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Driver CPU %",
+            "refId": "G8",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8004\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Driver Memory (MB)",
+            "refId": "H9",
             "queryType": "timeSeriesQuery"
           }
         ],
@@ -495,6 +596,150 @@
           "w": 24,
           "x": 0,
           "y": 72
+        }
+      },
+      {
+        "id": 1008,
+        "title": "Employee Service - CPU & Memory",
+        "type": "timeseries",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8003\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Employee CPU Usage %",
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8003\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Employee Memory Used (MB)",
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_virtual_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8003\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Employee Memory Virtual (MB)",
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "512",
+            "instant": false,
+            "legendFormat": "Employee Memory Limit (MB)",
+            "refId": "D",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "256",
+            "instant": false,
+            "legendFormat": "Employee Memory Request (MB)",
+            "refId": "E",
+            "queryType": "timeSeriesQuery"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 80
+        }
+      },
+      {
+        "id": 1009,
+        "title": "Driver Service - CPU & Memory",
+        "type": "timeseries",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "rate(process_cpu_seconds_total{job=\"bt-api-services\", instance=~\"host.docker.internal:8004\"}[5m]) * 100",
+            "instant": false,
+            "legendFormat": "Driver CPU Usage %",
+            "refId": "A",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_resident_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8004\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Driver Memory Used (MB)",
+            "refId": "B",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "process_virtual_memory_bytes{job=\"bt-api-services\", instance=~\"host.docker.internal:8004\"} / 1024 / 1024",
+            "instant": false,
+            "legendFormat": "Driver Memory Virtual (MB)",
+            "refId": "C",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "512",
+            "instant": false,
+            "legendFormat": "Driver Memory Limit (MB)",
+            "refId": "D",
+            "queryType": "timeSeriesQuery"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "256",
+            "instant": false,
+            "legendFormat": "Driver Memory Request (MB)",
+            "refId": "E",
+            "queryType": "timeSeriesQuery"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 90
         }
       }
     ],

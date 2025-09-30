@@ -13,11 +13,11 @@ import time
 from pathlib import Path
 
 def load_docker_compose():
-    """Đọc danh sách services từ docker-compose.yml"""
+    """Đọc danh sách services và ports từ docker-compose.yml"""
     docker_compose_file = Path("../../docker-compose.yml")
     if not docker_compose_file.exists():
         print("[ERROR] Không tìm thấy docker-compose.yml")
-        return []
+        return {}
     
     try:
         with open(docker_compose_file, 'r', encoding='utf-8') as f:
@@ -25,20 +25,39 @@ def load_docker_compose():
         
         # Parse YAML
         compose_data = yaml.safe_load(content)
-        services = list(compose_data.get('services', {}).keys())
+        services_data = compose_data.get('services', {})
         
-        # Loại bỏ các service không phải API service (như monitoring, etc.)
-        api_services = []
-        for service in services:
+        # Lấy thông tin services và ports
+        service_ports = {}
+        for service_name, service_config in services_data.items():
             # Bỏ qua các service monitoring
-            if 'monitoring' in service.lower() or 'grafana' in service.lower() or 'prometheus' in service.lower():
+            if 'monitoring' in service_name.lower() or 'grafana' in service_name.lower() or 'prometheus' in service_name.lower():
                 continue
-            api_services.append(service)
+            
+            # Tìm port từ ports mapping
+            ports = service_config.get('ports', [])
+            for port_mapping in ports:
+                if isinstance(port_mapping, str):
+                    # Format: "8000:8000"
+                    if ':' in port_mapping:
+                        host_port, container_port = port_mapping.split(':')
+                        if container_port == '8000':  # Container port luôn là 8000
+                            service_ports[service_name] = int(host_port)
+                            break
+                elif isinstance(port_mapping, dict):
+                    # Format: {target: 8000, published: 8000}
+                    if port_mapping.get('target') == 8000:
+                        service_ports[service_name] = int(port_mapping.get('published', 8000))
+                        break
         
-        return api_services
+        print(f"[INFO] Tìm thấy {len(service_ports)} services với ports:")
+        for service, port in service_ports.items():
+            print(f"  - {service}: {port}")
+        
+        return service_ports
     except Exception as e:
         print(f"[ERROR] Lỗi đọc docker-compose.yml: {e}")
-        return []
+        return {}
 
 def load_dashboard():
     """Đọc dashboard hiện tại"""
@@ -66,7 +85,7 @@ def save_dashboard(dashboard):
         print(f"[ERROR] Lỗi lưu dashboard: {e}")
         return False
 
-def create_service_panel(service_name, panel_id):
+def create_service_panel(service_name, port, panel_id):
     """Tạo panel cho service mới"""
     service_title = service_name.replace('_', ' ').replace('-', ' ').title()
     
@@ -264,23 +283,14 @@ def ensure_prometheus_datasource(dashboard):
     
     return dashboard
 
-def update_prometheus_config(services):
+def update_prometheus_config(service_ports):
     """Cập nhật Prometheus config với services mới"""
     print("[INFO] Đang cập nhật Prometheus config...")
     
-    # Tạo targets list từ services
+    # Tạo targets list từ services và ports thực tế
     targets = []
-    for service in services:
-        if service == 'template':
-            targets.append("'host.docker.internal:8000'  # template service")
-        elif service == 'order':
-            targets.append("'host.docker.internal:8001'  # order service")
-        elif service == 'customer':
-            targets.append("'host.docker.internal:8002'  # customer service")
-        else:
-            # Tự động tạo port cho service mới
-            port = 8000 + len(targets) + 1
-            targets.append(f"'host.docker.internal:{port}'  # {service} service")
+    for service_name, port in service_ports.items():
+        targets.append(f"'host.docker.internal:{port}'  # {service_name} service")
     
     # Tạo Prometheus config mới
     prometheus_config = f"""global:
@@ -383,16 +393,17 @@ def update_dashboard():
     """Cập nhật dashboard"""
     print("[INFO] Đang cập nhật Grafana dashboard...")
     
-    # Đọc danh sách services từ docker-compose.yml
-    current_services = load_docker_compose()
-    if not current_services:
+    # Đọc danh sách services và ports từ docker-compose.yml
+    service_ports = load_docker_compose()
+    if not service_ports:
         print("[ERROR] Không có services nào được tìm thấy")
         return False
     
+    current_services = list(service_ports.keys())
     print(f"[INFO] Tìm thấy {len(current_services)} services: {', '.join(current_services)}")
     
     # Cập nhật Prometheus config
-    if not update_prometheus_config(current_services):
+    if not update_prometheus_config(service_ports):
         print("[WARNING] Không thể cập nhật Prometheus config")
     
     # Restart Prometheus
@@ -464,14 +475,16 @@ def update_dashboard():
     for service in services_to_add:
         # Tìm service name gốc từ docker-compose
         original_service = None
+        service_port = None
         for orig in current_services:
             if orig.lower().replace('-', '_') == service:
                 original_service = orig
+                service_port = service_ports[orig]
                 break
         
-        if original_service:
-            print(f"[INFO] Thêm panel cho service: {original_service}")
-            new_panel = create_service_panel(original_service, next_panel_id)
+        if original_service and service_port:
+            print(f"[INFO] Thêm panel cho service: {original_service} (port: {service_port})")
+            new_panel = create_service_panel(original_service, service_port, next_panel_id)
             new_panel["gridPos"]["y"] = max_y
             dashboard["dashboard"]["panels"].append(new_panel)
             max_y += 4  # Mỗi panel cao 4

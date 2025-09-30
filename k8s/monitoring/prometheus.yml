@@ -65,5 +65,7 @@ scrape_configs:
       - 'host.docker.internal:8000'  # template service
       - 'host.docker.internal:8001'  # order service
       - 'host.docker.internal:8002'  # customer service
+      - 'host.docker.internal:8003'  # employee service
+      - 'host.docker.internal:8004'  # driver service
     metrics_path: /metrics
     scrape_interval: 30s

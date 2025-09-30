@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: driver-service
   namespace: bt-api
   labels:
-    app: order-service
-    service: order
+    app: driver-service
+    service: driver
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: order-service
+      app: driver-service
   template:
     metadata:
       labels:
-        app: order-service
-        service: order
+        app: driver-service
+        service: driver
     spec:
       containers:
-      - name: order-service
-        image: bt_api-order:latest
+      - name: driver-service
+        image: bt_api-driver:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
@@ -31,11 +31,11 @@ spec:
               key: DEBUG
         resources:
           requests:
-            memory: "128Mi"
+            memory: "64Mi"
             cpu: "50m"
           limits:
-            memory: "512Mi"
-            cpu: "200m"
+            memory: "128Mi"
+            cpu: "100m"
         livenessProbe:
           httpGet:
             path: /healthz
@@ -52,13 +52,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: order-service
+  name: driver-service
   namespace: bt-api
   labels:
-    app: order-service
+    app: driver-service
 spec:
   selector:
-    app: order-service
+    app: driver-service
   ports:
   - port: 8000
     targetPort: 8000
