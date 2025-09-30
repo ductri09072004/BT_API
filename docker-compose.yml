@@ -55,6 +55,12 @@ services:
       - DEBUG=true
       - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
       - MONGODB_DB=TPExpress
+      - KAFKA_BOOTSTRAP=host.docker.internal:9092
+      - KAFKA_TOPIC=employee.events
+    labels:
+      co.elastic.logs/enabled: "true"
+      co.elastic.logs/json.keys_under_root: "true"
+      co.elastic.logs/json.add_error_key: "true"
     restart: unless-stopped
 
   driver:
@@ -65,7 +71,51 @@ services:
       - DEBUG=true
       - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
       - MONGODB_DB=TPExpress
+      - KAFKA_BOOTSTRAP=host.docker.internal:9092
+      - KAFKA_TOPIC=driver.events
+    labels:
+      co.elastic.logs/enabled: "true"
+      co.elastic.logs/json.keys_under_root: "true"
+      co.elastic.logs/json.add_error_key: "true"
     restart: unless-stopped
+
+  # Kafka Infrastructure (using existing Redpanda)
+  # Redpanda is already running on port 9092
+
+  # Kafka Consumers for Monitoring
+  grafana-consumer:
+    build:
+      context: ./kafka
+      dockerfile: Dockerfile.consumer
+    environment:
+      - KAFKA_BOOTSTRAP=localhost:9092
+    ports:
+      - "9091:9090"  # Prometheus metrics endpoint (changed to avoid conflict)
+    restart: unless-stopped
+    command: ["python", "grafana-consumer.py"]
+    network_mode: "host"
+
+  kibana-consumer:
+    build:
+      context: ./kafka
+      dockerfile: Dockerfile.consumer
+    environment:
+      - KAFKA_BOOTSTRAP=localhost:9092
+      - ELASTICSEARCH_HOST=host.docker.internal:9200
+    restart: unless-stopped
+    command: ["python", "kibana-consumer.py"]
+    network_mode: "host"
+
+  vehicle:
+    build: ./services/vehicle
+    ports:
+      - "8005:8000"
+    environment:
+      - DEBUG=true
+      - MONGODB_URI=mongodb+srv://BlueDuck2:Fcsunny0907@tpexpress.zjf26.mongodb.net/?retryWrites=true&w=majority&appName=TPExpress
+      - MONGODB_DB=TPExpress
+    restart: unless-stopped
+
 
 
 

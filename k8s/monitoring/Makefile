@@ -23,6 +23,33 @@ status:
 logs:
 	@kubectl logs -f deployment/prometheus-grafana -n monitoring
 
+# Import a dashboard from grafana.com (ID 11835)
+import-11835:
+	@echo "📥 Importing Grafana.com dashboard ID 11835..."
+	@python3 import-grafana-11835.py
+	@echo "✅ Done. Open Grafana to view the dashboard."
+
+# Import dashboard by arbitrary Grafana.com ID: make import-id ID=12345
+import-id:
+	@if [ -z "$(ID)" ]; then echo "Usage: make import-id ID=12345"; exit 1; fi
+	@echo "📥 Importing Grafana.com dashboard ID $(ID)..."
+	@python3 import-grafana.py --id $(ID)
+	@echo "✅ Done. Open Grafana to view the dashboard."
+
+# Generate and import service traffic dashboard from local metrics
+service-traffic:
+	@echo "🛠️ Generating service traffic dashboard..."
+	@python3 generate-service-traffic-dashboard.py
+	@echo "📥 Importing dashboard into Grafana..."
+	@python3 import-service-traffic.py
+	@echo "✅ Service traffic dashboard imported."
+
+# Normalize and import user-provided service traffic dashboard JSON
+service-traffic-normalize:
+	@echo "🔧 Normalizing bt-api-service-traffic.json to match local metrics..."
+	@python3 normalize-and-import-service-traffic.py
+	@echo "✅ Normalized dashboard imported."
+
 # Port forward để truy cập local
 port-forward:
 	@echo "🌐 Starting port forwarding..."
