@@ -38,3 +38,5 @@ Write-Host ""
 Write-Host "✅ Kafka setup complete!" -ForegroundColor Green
 Write-Host "🌐 Kafka UI: http://localhost:8080" -ForegroundColor Cyan
 Write-Host "📡 Kafka Bootstrap: host.docker.internal:9092" -ForegroundColor Cyan
+
+

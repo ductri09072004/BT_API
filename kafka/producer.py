@@ -178,3 +178,5 @@ async def send_health_check(service_name: str, status: str, details: Dict[str, A
     """Send health check to Kafka"""
     producer = get_kafka_producer(service_name)
     await producer.send_health_check(status, details)
+
+

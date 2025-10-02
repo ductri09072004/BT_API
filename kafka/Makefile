@@ -72,3 +72,5 @@ stop-consumers:
 # Show consumer logs
 consumer-logs:
 	docker-compose logs -f grafana-consumer kibana-consumer
+
+

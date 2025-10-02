@@ -75,3 +75,5 @@ echo ""
 echo "🎉 Kafka setup complete!"
 echo "🌐 Kafka UI: http://localhost:8080"
 echo "📡 Kafka Bootstrap: host.docker.internal:9092"
+
+

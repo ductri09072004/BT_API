@@ -36,3 +36,5 @@ echo "   1. Start your services: docker-compose up -d"
 echo "   2. Start Kafka consumers: docker-compose up -d grafana-consumer kibana-consumer"
 echo "   3. Access Grafana: http://localhost:3000"
 echo "   4. Access Kibana: http://localhost:5601"
+
+

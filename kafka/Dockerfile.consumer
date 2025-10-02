@@ -19,3 +19,5 @@ COPY kibana-consumer.py .
 
 # Default command (can be overridden)
 CMD ["python", "grafana-consumer.py"]
+
+
